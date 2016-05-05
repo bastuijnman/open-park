@@ -16,6 +16,9 @@ public class Player : MonoBehaviour {
 
 		// Setup the player camera
 		Camera camera = gameObject.AddComponent<Camera> ();
+
+		// This is probably stupid to do
+		gameObject.tag = "MainCamera";
 	}
 		
 	void Update () {
@@ -32,9 +35,15 @@ public class Player : MonoBehaviour {
 		}
 		playerRotation.y += rotationMovement * (speed / 2);
 
-		// Handle movement on the terrain
-		Vector3 movement = new Vector3 (horizontalMovement, 0.0f, verticalMovement);
-		GetComponent<Rigidbody>().velocity = movement * speed;
+		// Calculate movement velocity
+		Vector3 velocityVertical = transform.forward * speed * verticalMovement;
+		Vector3 velocityHorizontal = transform.right * speed * horizontalMovement;
+
+		Vector3 calculatedVelocity = velocityHorizontal + velocityVertical;
+		calculatedVelocity.y = 0.0f;
+
+		// Apply calculated velocity
+		GetComponent<Rigidbody>().velocity = calculatedVelocity;
 
 		// Keep position with a variable height
 		transform.position = new Vector3 (transform.position.x, playerHeight, transform.position.z);
