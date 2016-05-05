@@ -50,7 +50,7 @@ public class LocalGrid : MonoBehaviour {
 
 					tile.transform.localPosition = new Vector3 (
 						col * tileSize,
-						0.0f,
+						0.1f, // Ever so slightly higher than the grid object
 						row * tileSize
 					);
 				}
