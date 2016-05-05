@@ -35,6 +35,10 @@ public class Player : MonoBehaviour {
 		}
 		playerRotation.y += rotationMovement * (speed / 2);
 
+		// Handle camera zooming and make sure scrolling is inverted
+		playerHeight -= Input.GetAxis("Mouse ScrollWheel") * speed;
+		playerHeight = Mathf.Clamp (playerHeight, 5.0f, 35.0f);
+
 		// Calculate movement velocity
 		Vector3 velocityVertical = transform.forward * speed * verticalMovement;
 		Vector3 velocityHorizontal = transform.right * speed * horizontalMovement;
