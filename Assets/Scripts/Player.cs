@@ -22,9 +22,18 @@ public class Player : MonoBehaviour {
 
 		float horizontalMovement = Input.GetAxis ("Horizontal");
 		float verticalMovement = Input.GetAxis ("Vertical");
+		float rotationMovement = 0.0f;
 
+		// Handle camera rotation
+		if (Input.GetKey (KeyCode.Q)) {
+			rotationMovement = -1.0f;
+		} else if (Input.GetKey (KeyCode.E)) {
+			rotationMovement = 1.0f;
+		}
+		playerRotation.y += rotationMovement * (speed / 2);
+
+		// Handle movement on the terrain
 		Vector3 movement = new Vector3 (horizontalMovement, 0.0f, verticalMovement);
-
 		GetComponent<Rigidbody>().velocity = movement * speed;
 
 		// Keep position with a variable height
