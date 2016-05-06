@@ -23,6 +23,11 @@ public class Player : MonoBehaviour {
 		
 	void Update () {
 
+		HandleMovement ();
+	
+	}
+
+	void HandleMovement () {
 		float horizontalMovement = Input.GetAxis ("Horizontal");
 		float verticalMovement = Input.GetAxis ("Vertical");
 		float rotationMovement = 0.0f;
@@ -36,7 +41,7 @@ public class Player : MonoBehaviour {
 		playerRotation.y += rotationMovement * (speed / 2);
 
 		// Handle camera zooming and make sure scrolling is inverted
-		playerHeight -= Input.GetAxis("Mouse ScrollWheel") * speed;
+		playerHeight -= Input.GetAxis ("Mouse ScrollWheel") * speed;
 		playerHeight = Mathf.Clamp (playerHeight, 5.0f, 35.0f);
 
 		// Calculate movement velocity
@@ -47,13 +52,13 @@ public class Player : MonoBehaviour {
 		calculatedVelocity.y = 0.0f;
 
 		// Apply calculated velocity
-		GetComponent<Rigidbody>().velocity = calculatedVelocity;
+		GetComponent<Rigidbody> ().velocity = calculatedVelocity;
 
 		// Keep position with a variable height
+		// TODO: Tween movement for smoother scrolling
 		transform.position = new Vector3 (transform.position.x, playerHeight, transform.position.z);
 
 		// Set player rotation
 		transform.rotation = Quaternion.Euler (playerRotation);
-	
 	}
 }

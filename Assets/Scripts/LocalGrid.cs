@@ -11,7 +11,8 @@ public class LocalGrid : MonoBehaviour {
 	private float x;
 	private float z;
 
-	private bool active = true;
+	// Local grid should not be activated by default
+	private bool active = false;
 
 	private GameObject tile;
 
