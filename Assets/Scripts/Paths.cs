@@ -23,7 +23,7 @@ public class Paths : MonoBehaviour {
 
 			if (Input.GetKeyDown (KeyCode.Escape)) {
 				editing = false;
-
+				paths.AddSection ();
 				points.RemoveAt (points.Count - 1);
 
 				return;
