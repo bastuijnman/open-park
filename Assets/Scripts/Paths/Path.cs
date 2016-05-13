@@ -14,15 +14,20 @@ public class Path
 	// The mesh filter used for adding the mesh
 	private MeshFilter filter;
 
+	// The mesh collider used for snapping etc
+	private MeshCollider collider;
+
 	// Our path mesh
 	private Mesh mesh;
 
-	// The currently managed points list
-	private List<Vector3> points;
+	// The currently managed section
+	private Section activeSection;
 
 	// Our section list
-	// TODO: This would benefit from using a struct
-	private List<List<Vector3>> sections = new List<List<Vector3>>();
+	private List<Section> sections = new List<Section>();
+
+	// Whether the path is currently snapping
+	private bool snapping = false;
 
 	/*
 	 * Constructor of the path class.
@@ -36,22 +41,48 @@ public class Path
 		// Initiate the path mesh
 		mesh = new Mesh ();
 
-		// Add the neccesary components to the dummy object
+		// Set object name
 		obj.name = "Path";
+
+		// Needed components
 		renderer = obj.AddComponent<MeshRenderer> ();
 		filter = obj.AddComponent<MeshFilter> ();
+		collider = obj.AddComponent<MeshCollider> ();
+		obj.AddComponent<MeshDebugger> ();
+
+		// Make sure mesh is set for both filter and collider
 		filter.sharedMesh = mesh;
+		collider.sharedMesh = mesh;
 
 		// Make sure we attach it to the parent given by the constructor
 		obj.transform.parent = parent;
 	}
 
 	/*
+	 * Handles ghosting effect of a new point
+	 */
+	public void Ghosting (Vector3 point) {
+		if (!snapping) {
+			activeSection [activeSection.Count - 1] = point;
+			FillVertices ();
+		}
+	}
+
+	public void StopGhosting () {
+		activeSection.Remove (activeSection [activeSection.Count - 1]);
+		FillVertices ();
+	}
+
+	public void StopSnapping () {
+		snapping = false;
+	}
+
+	/*
 	 * This method adds a new active section.
 	 */
 	public void AddSection() {
-		points = new List<Vector3> ();
-		sections.Add (points);
+		activeSection = new Section ();
+		sections.Add (activeSection);
 	}
 
 	/*
@@ -59,12 +90,20 @@ public class Path
 	 * active a new one will be added.
 	 */
 	public void AddPoint(Vector3 point, float width) {
-		if (points == null) {
+		if (activeSection == null) {
 			AddSection ();
 		}
-		points.Add (point);
+			
+		if (activeSection.Count == 0) {
+			activeSection.Add (point);
+		} else {
+			activeSection [activeSection.Count - 1] = point;
+		}
 
-		if (points.Count > 1) {
+		// Ghosting point?
+		activeSection.Add (point);
+
+		if (activeSection.Count > 1) {
 			FillVertices ();
 		}
 	}
@@ -94,7 +133,7 @@ public class Path
 		for (int s = 0; s < sections.Count; s++) {
 
 			// Get the list of points for the current section
-			List<Vector3> section = sections [s];
+			Section section = sections [s];
 
 			// Triangulation start at the last known added vertex (of the previous section)
 			int triangulateStart = lastVertex;
@@ -132,13 +171,19 @@ public class Path
 			triangles.AddRange (Triangulate (vertices, triangulateStart, lastVertex));
 		}
 
+		// Add Borders
+
 		// Set vertices, triangles and normals of the mesh
 		mesh.vertices = vertices.ToArray ();
 		mesh.triangles = triangles.ToArray ();
 		mesh.normals = normals.ToArray ();
 
-		// Recalculate normals of the mes
+		// Recalculate normals of the mesh
 		mesh.RecalculateNormals ();
+
+		// Update the collider mesh
+		// TODO: is this even performant?
+		collider.sharedMesh = mesh;
 	}
 
 	/*
@@ -174,6 +219,16 @@ public class Path
 
 		return triangles;
 
+	}
+
+	public void GetClosestEdge (Vector3 point) {
+		Vector3 previous = activeSection [activeSection.Count - 2];
+		Vector3 direction = (previous - point).normalized;
+
+		Vector3 end = point - direction * 2.0f;
+		Vector3 start = point - direction * 0.1f;
+
+		Debug.DrawLine (start, end, Color.yellow);
 	}
 
 }
